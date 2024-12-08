@@ -8,6 +8,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(express.static('dist'));
+
 let notes = [
     {
       id: "1",
