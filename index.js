@@ -12,6 +12,31 @@ app.use(express.static('dist'));
 
 app.use(express.json());
 
+
+// mongoose code
+
+const mongoose = require('mongoose');
+
+const url = 'mongodb+srv://rusonypenko:<PASSWORD>@cluster0.cryj8.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0'
+
+//Create .env file and place -> MONGODB_URI="mongodb+srv://rusonypenko:<PASSWORD>@cluster0.cryj8.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0"
+// const url = process.env.MONGODB_URI;
+
+mongoose.set('strictQuery', false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema);
+
+// npm installl dotenv
+
+// --------------
+
+
 let notes = [
     {
       id: "1",
@@ -35,7 +60,9 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-    response.json(notes);
+    Note.find({}).then(notes => {
+      response.json(notes)
+    })
 })
 
 app.get('/api/notes/:id', (request, response) => {
