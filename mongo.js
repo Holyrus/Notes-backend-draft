@@ -46,4 +46,4 @@ Note.find({}).then(result => {
     mongoose.connection.close();
 })
 
-// Use node mongo.js uCbebNNHJrQ1yLdx
+// Use node mongo.js <PASSWORD>

@@ -1,3 +1,7 @@
+// Must be imported before Note model!
+// Env variables defined in .env can be taken from -
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 
@@ -12,52 +16,32 @@ app.use(express.static('dist'));
 
 app.use(express.json());
 
+// Importing module
+const Note = require('./models/note.js');
 
-// mongoose code
+// let notes = [
+//     {
+//       id: "1",
+//       content: "HTML is easy",
+//       important: true
+//     },
+//     {
+//       id: "2",
+//       content: "Browser can execute only JavaScript",
+//       important: false
+//     },
+//     {
+//       id: "3",
+//       content: "GET and POST are the most important methods of HTTP protocol",
+//       important: true
+//     }
+//   ]
 
-const mongoose = require('mongoose');
+// app.get('/', (request, response) => {
+//     response.send('<h1>Hello Ruslan!</h1>')
+// })
 
-const url = 'mongodb+srv://rusonypenko:<PASSWORD>@cluster0.cryj8.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0'
-
-//Create .env file and place -> MONGODB_URI="mongodb+srv://rusonypenko:<PASSWORD>@cluster0.cryj8.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0"
-// const url = process.env.MONGODB_URI;
-
-mongoose.set('strictQuery', false);
-mongoose.connect(url);
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
-
-const Note = mongoose.model('Note', noteSchema);
-
-// npm installl dotenv
-
-// --------------
-
-
-let notes = [
-    {
-      id: "1",
-      content: "HTML is easy",
-      important: true
-    },
-    {
-      id: "2",
-      content: "Browser can execute only JavaScript",
-      important: false
-    },
-    {
-      id: "3",
-      content: "GET and POST are the most important methods of HTTP protocol",
-      important: true
-    }
-  ]
-
-app.get('/', (request, response) => {
-    response.send('<h1>Hello Ruslan!</h1>')
-})
+// Get all notes from database
 
 app.get('/api/notes', (request, response) => {
     Note.find({}).then(notes => {
@@ -65,49 +49,43 @@ app.get('/api/notes', (request, response) => {
     })
 })
 
+// Get individual note based on ID
+
 app.get('/api/notes/:id', (request, response) => {
-    const id = request.params.id 
-    const note = notes.find(note => note.id === id)
-
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
-    }
+    Note.findById(request.params.id).then(note => {
+      response.json(note);
+    })
 })
 
-app.delete('/api/notes/:id', (request, response) => {
-  const id = request.params.id;
-  notes = notes.filter(note => note.id !== id);
+// app.delete('/api/notes/:id', (request, response) => {
+//   const id = request.params.id;
+//   notes = notes.filter(note => note.id !== id);
 
-  response.status(204).end();
-})
+//   response.status(204).end();
+// })
 
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map(n => Number(n.id))) : 0;
-  return String(maxId + 1);
-}
+
+// Creating new note in Database
 
 app.post('/api/notes', (request, response) => {
   const body = request.body;
 
-  if (!body.content) {
+  if (body.content === undefined) {
     return response.status(400).json({ error: 'content is missing' })
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
-    important: Boolean(body.important) || false,
-    id: generateId(),
-  }
+    important: body.important || false,
+  })
 
-  notes = notes.concat(note);
-  
-  response.json(note);
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
 })
 
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
