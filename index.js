@@ -50,19 +50,47 @@ app.get('/api/notes', (request, response) => {
 })
 
 // Get individual note based on ID
-
-app.get('/api/notes/:id', (request, response) => {
-    Note.findById(request.params.id).then(note => {
-      response.json(note);
-    })
+// If note doesn't exits server will respond with 404 not found.
+app.get('/api/notes/:id', (request, response, next) => {
+    Note.findById(request.params.id)
+      .then(note => {
+        if (note) {
+          response.json(note);
+        } else {
+          response.status(404).end();
+        }
+      })
+      .catch(error => next(error));
+      // .catch(error => {
+      //   console.log(error);
+      //   response.status(400).send({ error: 'Malformatted id'});
+      // })
 })
 
-// app.delete('/api/notes/:id', (request, response) => {
-//   const id = request.params.id;
-//   notes = notes.filter(note => note.id !== id);
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
 
-//   response.status(204).end();
-// })
+// Changing importance 
+
+app.put('/api/notes/:id', (request, response, next) => {
+  const body = request.body;
+
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
+
+  Note.findByIdAndUpdate(request.params.id, note, { new: true })
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+})
 
 
 // Creating new note in Database
@@ -83,6 +111,18 @@ app.post('/api/notes', (request, response) => {
     response.json(savedNote)
   })
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'Malformatted id' })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler);
 
 
 const PORT = process.env.PORT;
