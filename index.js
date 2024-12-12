@@ -78,14 +78,28 @@ app.delete('/api/notes/:id', (request, response, next) => {
 // Changing importance 
 
 app.put('/api/notes/:id', (request, response, next) => {
-  const body = request.body;
+  // For enable validation to editing notes as well
 
-  const note = {
-    content: body.content,
-    important: body.important,
-  }
+  // const body = request.body;
 
-  Note.findByIdAndUpdate(request.params.id, note, { new: true })
+  // const note = {
+  //   content: body.content,
+  //   important: body.important,
+  // }
+
+  const {content, important} = request.body;
+
+  // Note.findByIdAndUpdate(request.params.id, note, { new: true })
+  //   .then(updatedNote => {
+  //     response.json(updatedNote)
+  //   })
+  //   .catch(error => next(error))
+
+  Note.findByIdAndUpdate(
+    request.params.id,
+    { content, important },
+    { new: true, runValidators: true, context: 'query' }
+  )
     .then(updatedNote => {
       response.json(updatedNote)
     })
@@ -95,21 +109,24 @@ app.put('/api/notes/:id', (request, response, next) => {
 
 // Creating new note in Database
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   const body = request.body;
 
-  if (body.content === undefined) {
-    return response.status(400).json({ error: 'content is missing' })
-  }
+  //This validation is not neccesary if we did validation in noteSchema
+  // if (body.content === undefined) {
+  //   return response.status(400).json({ error: 'content is missing' })
+  // }
 
   const note = new Note({
     content: body.content,
     important: body.important || false,
   })
 
-  note.save().then(savedNote => {
-    response.json(savedNote)
-  })
+  note.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    })
+    .catch(error => next(error))
 })
 
 const errorHandler = (error, request, response, next) => {
@@ -117,6 +134,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'Malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)
