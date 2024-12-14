@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf dist && cd ../Part-2-notes-frontent-draft && npm run build && cp -r dist ../Part-3-notes-backend-draft",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
@@ -19,6 +20,10 @@
     "mongoose": "^8.8.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@stylistic/eslint-plugin-js": "^2.12.1",
+    "eslint": "^9.17.0",
+    "globals": "^15.13.0",
     "nodemon": "^3.1.7"
   }
 }
