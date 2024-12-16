@@ -1,6 +1,6 @@
 import globals from "globals";
-import js from '@eslint/js';
-import stylisticJs from '@stylistic/eslint-plugin-js';
+import stylisticJs from '@stylistic/eslint-plugin-js'
+import js from '@eslint/js'
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -24,7 +24,7 @@ export default [
       ],
       '@stylistic/js/linebreak-style': [
         'error',
-        'unix'
+        'windows'
       ],
       '@stylistic/js/quotes': [
         'error',
@@ -37,17 +37,16 @@ export default [
       'eqeqeq': 'error',
       'no-trailing-spaces': 'error',
       'object-curly-spacing': [
-        'error',
-        'always'
+        'error', 'always'
       ],
       'arrow-spacing': [
-        'error',
-        { 'before': true, 'after': true },
+        'error', { 'before': true, 'after': true },
       ],
       'no-console': 'off',
+      "no-unused-vars": "warn",
     },
   },
-  {
-    ignores: ["dist/**"],
-  }
-];
+  { 
+    ignores: ["dist/**", "build/**"],
+  },
+]
