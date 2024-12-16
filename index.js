@@ -5,6 +5,9 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 
+const config = require('./utils/config.js')
+const logger = require('./utils/logger.js')
+
 const cors = require('cors')
 const corsOptions = {
   origin: ['http://localhost:5173'],
@@ -144,7 +147,6 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.listen(config.PORT, () => {
+  logger.info(`Server running on port ${config.PORT}`)
 })
